@@ -1,6 +1,120 @@
 = Семинар №2: Сборка C++ Программ
 :revealjs_theme: white
 
+== Типичные ошибки прошлого семинара
+
+Рассмотрим типичные ошибки/недочеты, допущенные при решении прошлого семинара.
+
+=== Неконсистентные типы
+
+[source,cpp]
+----
+int64_t id(int64_t n) {
+    int tmp = n;
+    return n;
+}
+----
+
+Где проблемы?
+
+=== Переполнение
+
+[source,cpp]
+----
+void say_hello(uint64_t times) {
+    for (int64_t i = 1; i <= times; ++i) {
+        cout << "Hello world " << i;
+    }
+}
+----
+
+Где проблемы?
+
+ifdef::backend-revealjs[=== !]
+
+[source,cpp]
+----
+void say_hello(uint64_t times) {
+    for (uint64_t i = 1; i <= times; ++i) {
+        cout << "Hello world " << i;
+    }
+}
+----
+
+Стало лучше?
+
+ifdef::backend-revealjs[=== !]
+
+Вариант исправления:
+
+[source,cpp]
+----
+void say_hello(uint64_t times) {
+    for (uint64_t i = 0; i < times; ++i) {
+        uint64_t j = i + 1;
+        cout << "Hello world " << j;
+    }
+}
+----
+
+=== Лишние заголовочные файлы и using
+
+.header.hpp
+[source,cpp]
+----
+#include <iostream>
+#include <cstdint>
+#include <string>
+
+using namespace std;
+
+void print_n_times(uint64_t times, string str);
+----
+
+Что здесь лишнее?
+
+ifdef::backend-revealjs[=== !]
+
+Оставим только необходимое:
+
+.header.hpp
+[source,cpp]
+----
+#include <cstdint>
+#include <string>
+
+void print_n_times(uint64_t times, std::string str);
+----
+
+=== Инициализация переменных
+
+[source,cpp]
+----
+void usage() {
+    ...
+    int tmp; // 1
+    ...
+    tmp = 10; // 2
+    ....
+}
+----
+
+Что находится в `tmp` между 1 и 2?
+
+ifdef::backend-revealjs[=== !]
+
+Если возможно, инициализируйте переменные сразу при объявлении:
+
+[source,cpp]
+----
+void usage() {
+    ...
+    int tmp = 10;
+    ....
+}
+----
+
+
 == Цели занятия
 
 * Разобраться с особенностями сборки C++ проектов, состоящих из нескольких единиц трансляции.
