@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cassert>
 
-void test_sum() {
+static void test_sum() {
     assert(sum({}, 0) == 0 && "Sum of empty array should be equal zero!");
 
     {
@@ -25,37 +25,48 @@ void test_sum() {
     }
 }
 
-void test_mins_suffix() {
-    {
-        int array[]{2, 2, 1, 3};
+static void test_count_numbers() {
+    assert(count_numbers({}, 0) == 0);
 
-        auto result = mins_suffix(array, 4);
-        assert(result[0] == array);
-        assert(result[1] == array);
-        assert(result[2] == array + 2);
-        assert(result[3] == array + 2);
+    {
+        int const arr[] {1, 2, 3, 4, 5, 4, 3, 2, 1};
+
+        assert(count_numbers(arr, 0) == 0);
+        assert(count_numbers(arr, 1) == 1);
+        assert(count_numbers(arr, 3) == 3);
+
+        assert(count_numbers(arr, sizeof(arr) / sizeof(int)) == 5);
+    }
+}
+
+static void test_sort() {
+    {
+        int const arr[] {1, 2, 3, 4, 5};
+        auto result = sort(arr, sizeof(arr) / sizeof(int));
+
+        for (size_t i = 0; i < 5; ++i) {
+            assert(result[i] == arr + i);
+        }
+
+        delete[] result;
+    }
+
+    {
+        int const arr[] {5, 4, 3, 2, 1};
+        auto result = sort(arr, sizeof(arr) / sizeof(int));
+
+        for (size_t i = 0; i < 5; ++i) {
+            assert(result[5 - i - 1] == arr + i);
+        }
 
         delete[] result;
     }
 }
 
-void test_min() {
-    {
-        int const array[]{1, 3, 5, 16, -3, 4, 2, -3};
-
-        assert(*min(array, 0, 8) == -3 && min(array, 0, 8) == array + 4);
-        assert(*min(array, 0, 3) == 1 && min(array, 0, 3) == array);
-        assert(*min(array + 1, 0, 3) == 3 && min(array + 1, 0, 3) == array + 1);
-
-        assert(min(array, 3, 2) == nullptr);
-    }
-
-}
-
 int main() {
     test_sum();
-    test_mins_suffix();
-    test_min();
+    test_count_numbers();
+    test_sort();
 
     std::cout << "Task 1 tests completed successfully!" << std::endl;
 
