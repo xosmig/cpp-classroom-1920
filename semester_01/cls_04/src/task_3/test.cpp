@@ -155,7 +155,56 @@ static void test_bot_math() {
 }
 
 static void test_bot_stealing() {
-    // TODO
+    bot_state* state_1 = init_bot();
+    bot_state* state_2 = init_bot();
+
+    string_bot_env env;
+
+    {
+        std::stringstream command;
+        command << "s " << state_1;
+
+        execute_command(&env, state_2, command.str().c_str());
+
+        assert(env.out_str.str().empty());
+        assert(env.err_str.str() == "Have nothing to steal!\n");
+    }
+
+    env.clear();
+
+    {
+        for (size_t i = 0; i < 16; ++i) {
+            execute_command(&env, state_2, "a 100");
+        }
+
+        std::stringstream command;
+        command << "s " << state_1;
+
+        execute_command(&env, state_2, command.str().c_str());
+
+        assert(env.out_str.str().empty());
+        assert(env.err_str.str() == "Cannot add more numbers!\n");
+    }
+
+    env.clear();
+
+    {
+        std::stringstream command;
+        command << "s " << state_2;
+
+        execute_command(&env, state_1, command.str().c_str());
+        execute_command(&env, state_1, command.str().c_str());
+
+        execute_command(&env, state_1, "r");
+        assert(env.out_str.str() == "100 + 100 = 200\n");
+        env.clear();
+
+        execute_command(&env, state_2, "r");
+        assert(env.out_str.str() == "100 + 100 + 100 + 100 + 100 + 100 + 100 + 100 + 100 + 100 + 100 + 100 + 100 + 100 = 1400\n");
+    }
+
+    stop_bot(state_1);
+    stop_bot(state_2);
 }
 
 int main() {
