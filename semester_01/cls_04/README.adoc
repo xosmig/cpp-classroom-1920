@@ -4,21 +4,37 @@
 == Организационные вопросы
 
 * Feedback & Google Forms
+* Можно ли править `test.cpp`?
 * Правила именования
 
 ifdef::backend-revealjs[=== !]
 
-Правила именования:
+Можно ли править код в `test.cpp`?
 
-* Branch: `sem_1_cls_<номер_семинара:две цифры>`
+* Не нужно изменять тестирующий код, но
 
-Пример: ветка сегодняшнего семинара `sem_1_cls_04`
+* Можно подключить свои заголовочные файлы
+* Можно добавить свои тесты
 
-* Pull Request: `"Classwork <N>, <фамилия> <имя>"`
+ifdef::backend-revealjs[=== !]
+
+Branch name
+
+`sem_1_cls_<номер_семинара:две цифры>`
+
+Пример: `sem_1_cls_04`
+
+ifdef::backend-revealjs[=== !]
+
+Pull Request name
+
+`"Classwork <N>, <фамилия> <имя>"`
 
 Пример: `Classwork 4, Башарин Егор`
 
-* Task: task_<N>
+ifdef::backend-revealjs[=== !]
+
+Task: task_<N>
 
 Пример: `task_1`, `task_2`, `task_3`
 
