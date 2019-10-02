@@ -9,7 +9,7 @@
 
 ifdef::backend-revealjs[=== !]
 
-Можно ли править код в `test.cpp`?
+==== Можно ли править код в `test.cpp`?
 
 * Не нужно изменять тестирующий код, но
 
@@ -18,7 +18,7 @@ ifdef::backend-revealjs[=== !]
 
 ifdef::backend-revealjs[=== !]
 
-Branch name
+==== Branch name
 
 `sem_1_cls_<номер_семинара:две цифры>`
 
@@ -26,13 +26,15 @@ Branch name
 
 ifdef::backend-revealjs[=== !]
 
-Pull Request name
+==== Pull Request name
 
 `"Classwork <N>, <фамилия> <имя>"`
 
 Пример: `Classwork 4, Башарин Егор`
 
 ifdef::backend-revealjs[=== !]
+
+==== Task name
 
 Task: task_<N>
 
