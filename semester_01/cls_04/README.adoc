@@ -7,34 +7,26 @@
 * Можно ли править `test.cpp`?
 * Правила именования
 
-ifdef::backend-revealjs[=== !]
-
-==== Можно ли править код в `test.cpp`?
+=== Можно ли править код в `test.cpp`?
 
 * Не нужно изменять тестирующий код, но
 
 * Можно подключить свои заголовочные файлы
 * Можно добавить свои тесты
 
-ifdef::backend-revealjs[=== !]
-
-==== Branch name
+=== Branch name
 
 `sem_1_cls_<номер_семинара:две цифры>`
 
 Пример: `sem_1_cls_04`
 
-ifdef::backend-revealjs[=== !]
-
-==== Pull Request name
+=== Pull Request name
 
 `"Classwork <N>, <фамилия> <имя>"`
 
 Пример: `Classwork 4, Башарин Егор`
 
-ifdef::backend-revealjs[=== !]
-
-==== Task name
+=== Task name
 
 Task: task_<N>
 
