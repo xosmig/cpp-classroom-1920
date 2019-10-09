@@ -407,13 +407,19 @@ double(*ptr)(std::string const& s) =
 
 В сигнатурах опущены const-ы и `&`, добавьте их!
 
+[source,cpp]
 ----
 char* read(char* data, int& out);
 char* write(char* data, int in);
 
 char* read(char* data, size_t& out);
 char* write(char* data, size_t in);
+----
 
+ifdef::backend-revealjs[=== !]
+
+[source, cpp]
+----
 char* read(char* data, char*& out);
 char* write(char* data, char* in);
 
