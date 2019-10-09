@@ -8,7 +8,6 @@
 * Познакомиться с базовыми контейнерами.
 * Вспомнить, как можно передавать/возвращать значения в функции.
 * Закрепить передачу функций по указателю.
-* Поиграть с анонимными функциями.
 
 == Типы-контейнеры
 
@@ -44,8 +43,8 @@ vec.push_back(20);
 vec.back(); // => 20
 vec.front(); // => 10
 vec[0] = 30;
-vec[0]; // 30
-vec[1]; // 10
+vec[0]; // => 30
+vec[1]; // => 10
 
 vec.pop_back();
 vec.size(); // => 1;
@@ -56,17 +55,30 @@ vec.size(); // => 1;
 [source,cpp]
 ----
 vector<int> vec { 1, 2, 3 };
-// если по какой-то причине нужен индекс
 for (size_t i = 0; i < vec.size(); ++i) {
     int& elem = vec[i];
 }
 
 // если не нужен индекс
-for (auto it = vec.begin(); it != vec.end(); ++it) {
+for (vector<int>::iterator it = vec.begin(); it != vec.end(); ++it) {
     int& elem = *it;
 }
 
 // C++11 и выше
+for (int& elem: vec) {
+    ...
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+[source,cpp]
+----
+// можно воспользоваться auto
+for (auto it = vec.begin(); it != vec.end(); ++it) {
+    int& elem = *it;
+}
+
 for (auto& elem: vec) {
     ...
 }
@@ -109,6 +121,67 @@ string completely_empty();
 === Итерация по строке
 
 Так же, как и по вектору.
+
+== Несколько слов про итераторы
+
+К вектору или массиву можно обращаться по индексу, и зачастую это удобно.
+
+[source,cpp]
+----
+int arr[] {1, 2, 3, 4};
+vector<int> vec { 5, 6, 7, 8 };
+
+arr[0]; // => 1
+vec[1]; // => 6
+----
+
+Но иногда таскать с собой и массив, и индекс -- неудобно.
+
+ifdef::backend-revealjs[=== !]
+
+Хотим написать функцию, ищущую максимум в массиве, и хотим искать его
+на произвольном участке в массиве.
+
+[.step]
+* Q: Постоянно передавать сам массив не хочется, что делать? Что объединяет в себе массив и индекс в нём?
+* A: Указатель! Его дешево копировать, это один параметр, и его можно разыменовать.
+
+ifdef::backend-revealjs[=== !]
+
+Указатели естественны для работы с массивами.
+
+Контейнеры могут быть более хитро устроены, но хотелось бы сохранить "интерфейс" работы с указателями.
+
+[.step]
+* Выход: итераторы!
+
+ifdef::backend-revealjs[=== !]
+
+Контейнеры вроде `vector` определяют внутренние типы-итераторы.
+
+Эти типы имитируют указатели.
+
+ifdef::backend-revealjs[=== !]
+
+Работа с итератором вектора.
+
+[source,cpp]
+----
+// typedef vector<int>::iterator vec_iterator;
+using vec_iterator = vector<int>::iterator;
+
+vector<int> vec {1, 2, 3};
+vec_iterator it = vec.begin();
+
+*it; // => 1
+++it;
+*it; // => 2
+
+*it = 4; // теперь vec = {1, 4, 3};
+
+it += 2; // it указывает на позицию после последнего элемента
+it == vec.end(); // => true, end() указывает туда же
+----
 
 == CPP Reference
 
@@ -215,11 +288,12 @@ ifdef::backend-revealjs[=== !]
 
 [source,cpp]
 ----
-double sum(std::vector<doulbe> vec) {
+double sum(std::vector<double> vec) {
     double result = 0;
     for (double d : vec) {
         result += d;
     }
+    return result;
 }
 ----
 
@@ -233,11 +307,12 @@ A: Вектор передается по значению, а значит он
 
 [source,cpp]
 ----
-double sum(std::vector<doulbe> const& vec) {
+double sum(std::vector<double> const& vec) {
     double result = 0;
     for (double d : vec) {
         result += d;
     }
+    return result;
 }
 ----
 
@@ -254,6 +329,7 @@ void print_all(std::vector<std::string> vec) {
 }
 ----
 
+////
 == Лямбда-функции и указатели на функции
 
 Мы не будем вдаваться в детали работы с лямбда-функциями.
@@ -311,10 +387,6 @@ double(*ptr)(std::string const& s) =
     static_cast<double(*)(std::string const& s)>(obj);
 ----
 
-
-////
-В отличие от C, C++ позволяет нам контролировать то, как объект создается, копируется и уничтожается.
-За счет этого можно создавать типы, которые
 ////
 
 == Задачи
@@ -331,17 +403,22 @@ double(*ptr)(std::string const& s) =
 
 === Задача №2
 
-Напишите несколько функций для чтения/записи типизированных данных из/в массив памяти.
+Напишите функции для чтения/записи типизированных данных из/в массив памяти.
+
+В сигнатурах опущены const-ы и `&`, добавьте их!
 
 ----
-char* read(char* input, int& i);
-char* write(char* input, int i);
+char* read(char* data, int& out);
+char* write(char* data, int in);
 
-char* read(char* input, size_t& i);
-char* write(char* input, size_t i);
+char* read(char* data, size_t& out);
+char* write(char* data, size_t in);
 
-char* read(char* input, char*);
-char* write(char* input, char const*);
+char* read(char* data, char*& out);
+char* write(char* data, char* in);
+
+char* read(char* input, std::vector<int>& vec);
+char* write(char* input, std::vector<int> vec);
 ----
 
 Возвращаемое значение -- указатель на участок памяти, с которого можно продолжать чтение/запись.
