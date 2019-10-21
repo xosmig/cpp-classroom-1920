@@ -1,6 +1,9 @@
 #include "shared_buffer.hpp"
 
 #include <cassert>
+#include <cstddef>
+#include <cstring>
+#include <type_traits>
 
 static void test_shared_buffer() {
     {
@@ -33,7 +36,7 @@ static void test_shared_buffer() {
 
         assert(buf1.get_size() == buf2.get_size() && "Buffers should have the same size");
         assert(buf1.get_data() == buf2.get_data() && "Buffers should point to the same memory");
-        assert(std::strcmp(buf1.get_data(), buf2.get_data()) == 0 && "Buffers should have equal content")
+        assert(std::strcmp(buf1.get_data(), buf2.get_data()) == 0 && "Buffers should have equal content");
 
         buf3 = ref;
         assert(buf1.get_data() == buf3.get_data() && "After assignment, buf1 and buf3 should point to the same memory too");
