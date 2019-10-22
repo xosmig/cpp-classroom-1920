@@ -1,0 +1,9 @@
+*.o
+*.obj
+*.exe
+build
+# for CLion
+cmake-build-debug 
+.vscode
+.idea
+.vs
