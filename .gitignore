@@ -1,9 +1,34 @@
+# Executables
+*.exe
+*.out
+*.app
+
+# Compiled Object files
+*.slo
+*.lo
 *.o
 *.obj
-*.exe
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# CMake build dirs
 build
-# for CLion
 cmake-build-debug 
+
+# IDE Metadata folders
 .vscode
 .idea
 .vs
