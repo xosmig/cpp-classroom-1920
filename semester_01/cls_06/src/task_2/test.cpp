@@ -37,6 +37,14 @@ static void test_lazy_string() {
     }
 
     {
+        lazy_string s = "Hello";
+        lazy_string s_concat = concat(s, " with suffix");
+        assert(std::strstr(s_concat.c_str(), s.c_str()) == s_concat.c_str());
+
+        assert(strlen(s.c_str()) + 12 == strlen(s_concat.c_str()));
+    }
+
+    {
         std::string str {"Hello, world!"};
         lazy_string lazy_str {str.c_str() };
 
