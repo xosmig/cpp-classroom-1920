@@ -12,3 +12,4 @@ endif()
 
 # add_executable(task-1-test src/task_1/test.cpp src/shared_buffer.cpp src/lazy_string.cpp)
 # add_executable(task-2-test src/task_2/test.cpp src/shared_buffer.cpp src/lazy_string.cpp)
+# add_executable(task-3-test src/task_3/test.cpp src/shared_buffer.cpp src/lazy_string.cpp)
