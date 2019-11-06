@@ -5,14 +5,14 @@
 #include <string>
 #include <sstream>
 
-static std::string to_string(cls_08::lazy_string const& str) {
+static std::string to_string(cls_07::lazy_string const& str) {
     std::stringstream ss;
     ss << str;
 
     return ss.str();
 }
 
-void test_lazy_string_operators() {
+static void test_lazy_string_operators() {
     {
         assert(to_string("").empty());
         assert(to_string("abc") == "abc");
@@ -22,7 +22,7 @@ void test_lazy_string_operators() {
     }
 
     {
-        cls_08::lazy_string str;
+        cls_07::lazy_string str;
 
         assert(!(str < str));
         assert(str < "a");
@@ -36,8 +36,8 @@ void test_lazy_string_operators() {
     }
 
     {
-        cls_08::lazy_string left = "1";
-        cls_08::lazy_string right = "0";
+        cls_07::lazy_string left = "1";
+        cls_07::lazy_string right = "0";
 
         assert(to_string(left + right) == "10");
         assert(to_string(right + left) == "01");
@@ -49,7 +49,7 @@ void test_lazy_string_operators() {
     }
 
     {
-        cls_08::lazy_string const l_str = "Hello world!";
+        cls_07::lazy_string const l_str = "Hello world!";
         std::string const str = l_str.c_str();
 
         for (size_t i = 0; i < l_str.get_size(); ++i) {
@@ -58,7 +58,7 @@ void test_lazy_string_operators() {
     }
 
     {
-        cls_08::lazy_string original = "Hello";
+        cls_07::lazy_string original = "Hello";
         auto copy = original;
 
         original += "!";
@@ -69,12 +69,12 @@ void test_lazy_string_operators() {
 }
 
 static void test_c_str_is_shared() {
-    cls_08::lazy_string str;
+    cls_07::lazy_string str;
     for (size_t i = 0; i < 100; ++i) {
         str += "another";
     }
 
-    cls_08::lazy_string copy = str;
+    cls_07::lazy_string copy = str;
 
     assert(str.c_str() == copy.c_str());
 }

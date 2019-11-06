@@ -6,7 +6,7 @@
 
 static void test_lazy_string_find() {
     {
-        cls_08::lazy_string empty;
+        cls_07::lazy_string empty;
 
         assert(find(empty, "") == 0);
         assert(find(empty, "", 0) == 0);
@@ -18,7 +18,7 @@ static void test_lazy_string_find() {
     }
 
     {
-        cls_08::lazy_string hello {"Hello world!"};
+        cls_07::lazy_string hello {"Hello world!"};
 
         assert(find(hello, "H") == 0);
         assert(find(hello, "e") == 1);
@@ -32,7 +32,7 @@ static void test_lazy_string_find() {
     }
 
     {
-        cls_08::lazy_string str = "one@two@three@four";
+        cls_07::lazy_string str = "one@two@three@four";
 
         assert(find(str, "@") == 3);
         assert(find(str, "@", 4) == 7);

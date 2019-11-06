@@ -72,7 +72,7 @@ lazy_string concat(lazy_string const& lhs, lazy_string const& rhs) {
 
 Теперь, когда вы знакомы с `namespace`-ами, мы начнем их использовать во всех дорешках.
 
-Занесите всё ваше решение в неймспейс `cls_08`.
+Занесите всё ваше решение в неймспейс `cls_07`.
 
 ifdef::backend-revealjs[=== !]
 
