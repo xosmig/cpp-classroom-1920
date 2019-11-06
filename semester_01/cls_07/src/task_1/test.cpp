@@ -10,11 +10,11 @@ static void test_lazy_string_find() {
 
         assert(find(empty, "") == 0);
         assert(find(empty, "", 0) == 0);
-        assert(find(empty, "", 1) == -1);
+        assert(find(empty, "", 1) == cls_07::lazy_string::npos);
 
-        assert(find(empty, "smth") == -1);
-        assert(find(empty, "smth", 0) == -1);
-        assert(find(empty, "smth", 1) == -1);
+        assert(find(empty, "smth") == cls_07::lazy_string::npos);
+        assert(find(empty, "smth", 0) == cls_07::lazy_string::npos);
+        assert(find(empty, "smth", 1) == cls_07::lazy_string::npos);
     }
 
     {
@@ -24,7 +24,7 @@ static void test_lazy_string_find() {
         assert(find(hello, "e") == 1);
         assert(find(hello, "!") == 11);
 
-        assert(find(hello, "H", 1) == -1);
+        assert(find(hello, "H", 1) == cls_07::lazy_string::npos);
 
         assert(find(hello, "Hello") == 0);
         assert(find(hello, "world") == 6);
@@ -37,9 +37,9 @@ static void test_lazy_string_find() {
         assert(find(str, "@") == 3);
         assert(find(str, "@", 4) == 7);
         assert(find(str, "@", 8) == 13);
-        assert(find(str, "@", 14) == -1);
+        assert(find(str, "@", 14) == cls_07::lazy_string::npos);
 
-        assert(find(str, "@", 1024) == -1);
+        assert(find(str, "@", 1024) == cls_07::lazy_string::npos);
     }
 }
 
