@@ -6,9 +6,10 @@
 #include <fstream>
 #include <type_traits>
 
-namespace cls_08 {
-    using my_ostream = my_ostream;
-    using my_ostream_file = my_ostream_file;
+static std::string read_file_content(std::string const& name) {
+    std::fstream file{name};
+
+    return {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
 }
 
 static_assert(std::is_abstract<my_ostream>::value, "my_ostream should be abstract class!");
