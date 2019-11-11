@@ -1,5 +1,5 @@
-#include "my_ostream.h"
-#include "my_ostream_con.h"
+#include "my_ostream.hpp"
+#include "my_ostream_con.hpp"
 
 #include <cassert>
 #include <iostream>
