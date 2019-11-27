@@ -3,6 +3,7 @@
 #include <cassert>
 #include <string>
 #include <list>
+#include <stdexcept>
 
 static void test_queue() {
     {
@@ -81,6 +82,32 @@ static void test_queue() {
             }
 
             assert_consistent();
+        }
+    }
+
+    {
+        static size_t counter{0};
+
+        struct throws_on_copy {
+            throws_on_copy() = default;
+            throws_on_copy(throws_on_copy const& other) {
+                if (++counter % 3 == 0) {
+                    throw std::runtime_error("Exception from copy constructor");
+                }
+            }
+        };
+
+        cls_09::queue<throws_on_copy> queue;
+
+        for (int i = 0; i < 100; ++i) {
+            throws_on_copy element;
+
+            size_t previous_size = queue.size();
+            try {
+                queue.push(element);
+            } catch (std::runtime_error const&) {
+                assert(previous_size == queue.size());
+            }
         }
     }
 }
