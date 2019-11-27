@@ -27,22 +27,22 @@ static void test_queue() {
         cls_09::queue<int> queue;
         cls_09::queue<int> const& ref = queue;
 
-        auto check_queue_state = [&](size_t size, int front, int back) {
-            assert(queue.size() == size && queue.front() == front && queue.back() == back); \
-            assert(ref.size() == size && ref.front() == front && ref.back() == back);
+        auto check_queue_state = [&](size_t size, int front) {
+            assert(queue.size() == size && queue.front() == front); \
+            assert(ref.size() == size && ref.front() == front);
         };
 
         queue.push(0);
-        check_queue_state(1, 0, 0);
+        check_queue_state(1, 0);
 
         queue.push(1);
-        check_queue_state(2, 0, 1);
+        check_queue_state(2, 0);
 
         queue.push(2);
-        check_queue_state(3, 0, 2);
+        check_queue_state(3, 0);
 
         queue.pop();
-        check_queue_state(2, 1, 2);
+        check_queue_state(2, 1);
 
 #undef CHECK_QUEUE_STATE
     }
@@ -68,8 +68,9 @@ static void test_queue() {
 
         auto assert_consistent = [&]() {
             assert(queue.size() == original.size());
-            assert(queue.front() == original.front());
-            assert(queue.back() == original.back());
+            if (queue.size() != 0) {
+                assert(queue.front() == original.front());
+            }
         };
 
         for (int i = 0; i < 1024; ++i) {
