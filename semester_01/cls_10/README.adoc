@@ -1,0 +1,175 @@
+= Шаблоны в C++. Часть 2
+:source-highlighter: highlightjs
+:icons: font
+
+smart pointers, scoped ptr, shared ptr, RAII
+
+== RAII
+
+Получение ресурса есть инициализация (англ. Resource Acquisition Is Initialization (RAII)) — программная идиома объектно-ориентированного программирования, смысл которой заключается в том, что с помощью тех или иных программных механизмов получение некоторого ресурса неразрывно совмещается с инициализацией, а освобождение — с уничтожением объекта.
+
+////
+=== RAII в других языках
+
+// пример на питоне
+
+// пример на джаве
+////
+
+== Управление временем жизни
+
+Предлагается написать “умные” указатели, которые при инициализации получают ресурс (объект выделенный в куче), а при уничтожении - освобождают ресурс.
+
+////
+=== Мотивация
+
+// рассказать про то, что самому ловить объекты, созданные через new, неудобно
+////
+
+== Задача 1. scoped_ptr<T>
+
+0.5 балла
+
+Время жизни такого указателя - от места создания указателя до конца объемлющего скоупа.
+
+ifdef::backend-revealjs[=== !]
+
+[source,cpp]
+----
+void bar() {
+    scoped_ptr<foo> foo_ptr(new foo {0, 111});
+    std::cout << (*foo_ptr).field1
+        << foo_ptr->field1
+        << foo_ptr.get()
+        << std::endl;
+
+    if (foo_ptr) foo_ptr->field1 += 1;
+
+    foo_ptr = std::move(foo_ptr); // - compilation fails
+    auto foo_ptr2(foo_ptr);// - compilation fails
+    foo_ptr = foo_ptr; // - compilation fails
+    bool_1st_arg_func(foo_ptr); // - compilation fails
+} // foo_ptr destroys. Operator delete is called.
+----
+
+ifdef::backend-revealjs[=== !]
+
+[source,cpp]
+----
+foo_ptr.reset(); //now foo_ptr->field1 fails in runtime
+foo_ptr.reset(new foo {0, 111}); //now ok
+foo* ptr = foo_ptr.release(); //foo_ptr->field1 - fails
+scoped_ptr<foo> foo_ptr2; //foo_ptr2->field1 fails in runtime
+
+// provide useful types
+decltype(foo_ptr)::element_type foo_on_stack { 999, 1000 };
+----
+
+ifdef::backend-revealjs[=== !]
+
+WARNING: Это задание стоит сделать на паре.
+
+////
+== Задача 2. unique_ptr<T>
+
+1 балл
+
+Это расширение `scoped_ptr`, которое поддерживает передачу владения ресурсом другому `unique_ptr` при операции `move` и при возврате из функции.
+
+ifdef::backend-revealjs[=== !]
+
+[source,cpp]
+----
+unique_ptr<foo> foo_uptr(new foo {666, 777});
+//+ to scoped_ptr<T>:
+unique_ptr<foo>  foo_uptr2 = std::move(foo_uptr); // - ok
+foo_uptr2 = std::move(foo_uptr2); // - ok
+std::cerr << foo_uptr->field1 << std::endl; // - runtime fail
+unique_ptr<foo> foo_uptr3(foo_uptr); // - compilation fails
+----
+
+ifdef::backend-revealjs[=== !]
+
+[source,cpp]
+----
+unique_ptr<foo> create_foo() {
+    return unique_ptr<foo>(new foo {666, 777}); // move ctor
+}
+unique_ptr<foo> foo_ptr = create_foo(); // move assign
+
+void receive_foo(unique_ptr<foo> foo_ptr) {
+...
+}
+receive_foo(create_foo()); // move ctor
+----
+////
+
+== Задача 2. shared_ptr<T>
+
+1 балл.
+
+Это более умный указатель, которое поддерживает копирование и удаляет ресурс после удаления последнего ссылающегося умного указателя. Должен обладать следующими функциями:
+
+[source,cpp]
+----
+// возвращает хранимый указатель
+T* get() const;
+// заменяет хранимый указатель на другой
+void reset(T* other = nullptr);
+// а также явный оператор приведения к bool.
+// Возвращает true, если указатель непустой
+----
+
+ifdef::backend-revealjs[=== !]
+
+[source,cpp]
+----
+shared_ptr<foo> foo_shptr(new foo {888, 999});
+//+ to unique_ptr:
+shared_ptr<foo> foo_shptr2 = foo_shptr;
+assert(foo_shptr.get() == foo_shptr2.get());
+std::cout << foo_shptr->field1
+    << " "
+    << foo_shptr2->field1
+    << std::endl;
+
+// bad usage
+// leads to double delete
+shared_ptr<foo> foo_shptr3(foo_shptr2.get());
+----
+
+== Задача 3. weak_ptr<T>
+
+1 балл.
+
+Этот указатель является дополнением `shared_ptr`, и служит для решения проблемы циклических ссылок.
+Должен обладать следующими операциями:
+
+[source,cpp]
+----
+// очищает хранимый указатель (присваивает в него nullptr)
+void reset();
+
+// возвращает true, если объект уже удалён
+bool expired() const;
+
+// возвращает сильный указатель, если он ещё не был удален
+// иначе пустой shared_ptr
+shared_ptr<T> lock() const;
+----
+
+ifdef::backend-revealjs[=== !]
+
+[source,cpp]
+----
+weak_ptr<foo> weak_foo; // empty
+shared_ptr<foo> strong_foo(new foo {1, 2});
+weak_foo = strong_foo;
+
+if (shared_ptr<foo> lock = weak_foo.lock()) {
+    assert(lock->field1 == 1);
+}
+
+strong_foo.reset();
+assert(weak_foo.expired());
+----
