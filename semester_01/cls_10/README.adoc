@@ -158,8 +158,105 @@ bool expired() const;
 shared_ptr<T> lock() const;
 ----
 
+=== Зачем нужен lock?
+
+Допустим, `weak_ptr` имеет интерфейс как у `shared_ptr`.
+
+[source,cpp]
+----
+void do_something(weak_ptr<user> ptr) {
+    if (!ptr.expired()) {
+        auto name = ptr->name;
+    }
+}
+----
+
+Что может пойти не так?
+
 ifdef::backend-revealjs[=== !]
 
+Проблема: можно обратиться к уже удаленному объекту.
+
+[source,cpp]
+----
+void do_something(weak_ptr<user> ptr) {
+    // тут объект существует
+    if (!ptr.expired()) {
+        // в это время последний shared_ptr был удален
+        //
+        // обращение к удаленному объекту
+        auto name = ptr->name;
+    }
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+`lock` должен вернуть `shared_ptr`, который не даст объекту преждевременно погибнуть.
+
+[source,cpp]
+----
+void do_something(weak_ptr<user> ptr) {
+    if (!ptr.expired()) {
+        auto strong_ptr = ptr.lock();
+        auto name = strong_ptr->name;
+    }
+}
+----
+
+Теперь всё хорошо?
+
+ifdef::backend-revealjs[=== !]
+
+Проблема: можно не успеть создать `shared_ptr`.
+
+[source,cpp]
+----
+void do_something(weak_ptr<user> ptr) {
+    // тут объект существует
+    if (!ptr.expired()) {
+        // здесь он погиб
+        // поэтому strong_ptr пуст
+        auto strong_ptr = ptr.lock();
+        // обращение по nullptr
+        auto name = strong_ptr->name;
+    }
+}
+----
+
+Что делать?
+
+ifdef::backend-revealjs[=== !]
+
+Решение: нужно проверить `strong_ptr` перед использованием.
+
+[source,cpp]
+----
+void do_something(weak_ptr<user> ptr) {
+    auto strong_ptr = ptr.lock();
+    if (strong_ptr) {
+        auto name = strong_ptr->name;
+    }
+    // здесь strong_ptr уже не нужен
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+Можно ещё лучше!
+
+[source,cpp]
+----
+void do_something(weak_ptr<user> ptr) {
+    // объявление и инициализация прямо в if
+    if (auto strong_ptr = ptr.lock()) {
+        auto name = strong_ptr->name;
+    }
+    // здесь strong_ptr уже не доступен
+}
+----
+
+=== Пример использования weak_ptr
 [source,cpp]
 ----
 weak_ptr<foo> weak_foo; // empty
