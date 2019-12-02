@@ -12,6 +12,8 @@ endif()
 
 include_directories(src)
 
-add_executable(task-1-test src/task_1/test.cpp)
-add_executable(task-2-test src/task_2/test.cpp)
-# add_executable(task-3-test src/task_3/test.cpp)
+#add_executable(task-1-test src/task_1/test.cpp)
+#add_executable(task-2-test src/task_2/test.cpp)
+
+#add_executable(task-3-test src/task_3/test.cpp)
+#include_directories(task-3-test src/task_2)

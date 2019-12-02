@@ -83,6 +83,15 @@ static void test_scoped_ptr() {
         ptr.reset(new int{20});
         assert(*ptr == 20);
     }
+    
+    {
+        int* i = new int{10};
+        cls_10::scoped_ptr<int> ptr{i};
+        
+        assert(i == ptr.release());
+        
+        delete i;
+    }
 }
 
 int main() {

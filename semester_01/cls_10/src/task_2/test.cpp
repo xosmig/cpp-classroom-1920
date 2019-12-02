@@ -89,6 +89,24 @@ static void test_shared_ptr() {
 
     }
 
+    {
+        cls_10::shared_ptr<int> first{new int{10}};
+        cls_10::shared_ptr<int> second{first};
+
+        first.reset();
+        assert(first.get() != second.get());
+
+        first = second;
+        assert(first.get() == second.get());
+
+        second.reset(new int{20});
+        assert(first.get() != second.get());
+
+        second = first;
+        assert(first.get() == second.get());
+
+    }
+
 #ifdef SHARED_PTR_WITH_INCOMPLETE_TYPES
     {
         struct foo;
