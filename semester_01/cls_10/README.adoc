@@ -67,16 +67,15 @@ ifdef::backend-revealjs[=== !]
 ----
 lazy_string concat(lazy_string lhs, lazy_string rhs) {
     char* buffer = new char*[lhs.size() + rhs.size() + 1]{};
-
     for (size_t i = 0; i < lhs.size(); ++i) {
         buffer[i] = lhs.at(i);
     }
-
     for (size_t i = 0; i < lhs.size(); ++i) {
         buffer[lhs.size() + i] = rhs.at(i);
     }
-
-    return lazy_string(buffer);
+    auto result = lazy_string(buffer);
+    delete[] buffer;
+    return result;
 }
 ----
 
@@ -99,7 +98,9 @@ lazy_string concat(lazy_string lhs, lazy_string rhs) {
     for (size_t i = 0; i < lhs.size(); ++i) {
         buffer[lhs.size() + i] = rhs.at(i);
     }
-    return lazy_string(buffer);
+    auto result = lazy_string(buffer);
+    delete[] buffer;
+    return result;
 }
 ----
 
@@ -128,7 +129,15 @@ lazy_string concat(lazy_string lhs, lazy_string rhs) {
 
 ifdef::backend-revealjs[=== !]
 
-Вы уже очень пользуетесь RAII:
+Если будет брошено исключение, то произойдет "раскрутка стека" (stack unwinding).
+
+В процессе раскрутки будут вызваны деструкторы всех локальных переменных.
+
+Т.е. будет вызван деструктор shared_buffer => утечки не будет.
+
+ifdef::backend-revealjs[=== !]
+
+Вы уже пользуетесь RAII:
 
 * `std::string` для `char const*`
 * `std::vector` и другие контейнеры для `T[]`
@@ -143,7 +152,7 @@ ifdef::backend-revealjs[=== !]
 Хочется иметь инструмент, который можно использовать в сочетании с произвольным указателем
 и уберечь себя от утечек.
 
-Наличие в C++ классов, конструкторов/деструкторов и шаблонов позволяет создать такой инструмент:
+Наличие в C++ классов, конструкторов/деструкторов, шаблонов и перегрузки операторов позволяет создать такой инструмент:
 
 *Умные указатели*
 
@@ -169,7 +178,7 @@ void bar() {
     foo_ptr = std::move(foo_ptr); // - compilation fails
     auto foo_ptr2(foo_ptr);// - compilation fails
     foo_ptr = foo_ptr; // - compilation fails
-    bool_1st_arg_func(foo_ptr); // - compilation fails
+    bool status = foo_ptr; // - compilation fails
 } // foo_ptr destroys. Operator delete is called.
 ----
 
@@ -202,7 +211,6 @@ ifdef::backend-revealjs[=== !]
 [source,cpp]
 ----
 unique_ptr<foo> foo_uptr(new foo {666, 777});
-//+ to scoped_ptr<T>:
 unique_ptr<foo>  foo_uptr2 = std::move(foo_uptr); // - ok
 foo_uptr2 = std::move(foo_uptr2); // - ok
 std::cerr << foo_uptr->field1 << std::endl; // - runtime fail
@@ -246,7 +254,6 @@ ifdef::backend-revealjs[=== !]
 [source,cpp]
 ----
 shared_ptr<foo> foo_shptr(new foo {888, 999});
-//+ to unique_ptr:
 shared_ptr<foo> foo_shptr2 = foo_shptr;
 assert(foo_shptr.get() == foo_shptr2.get());
 std::cout << foo_shptr->field1
@@ -310,6 +317,8 @@ void do_something(weak_ptr<user> ptr) {
     }
 }
 ----
+
+Нам нужно получить "сильную ссылку" на объект.
 
 ifdef::backend-revealjs[=== !]
 
