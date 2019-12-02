@@ -8,23 +8,144 @@ smart pointers, scoped ptr, shared ptr, RAII
 
 Получение ресурса есть инициализация (англ. Resource Acquisition Is Initialization (RAII)) — программная идиома объектно-ориентированного программирования, смысл которой заключается в том, что с помощью тех или иных программных механизмов получение некоторого ресурса неразрывно совмещается с инициализацией, а освобождение — с уничтожением объекта.
 
+
 ////
-=== RAII в других языках
+=== Управление ресурсами
 
-// пример на питоне
+.Чтение из файла в Python
+[source,python]
+----
+with open("text.txt") as file:
+    # файл открыт для чтения
+    for line in file:
+        print(line)
 
-// пример на джаве
+# здесь ресурс (файл) закрыт
+----
+
+ifdef::backend-revealjs[=== !]
+
+.Чтение из файла в Java
+[source,java]
+----
+try (var reader = new BufferedReader(
+        new FileReader("text.txt"))) {
+    // файл открыт для чтения
+    return reader.readLine();
+}
+// файл закрыт
+----
+
+ifdef::backend-revealjs[=== !]
+
+.Чтение из файла в C++
+[source,cpp]
+----
+{
+    std::fstream file {"text.txt"};
+
+    // если выполнение дошло до этой строки,
+    // значит, мы открыли файл
+    std::string line;
+    std::getline(file, line);
+} // здесь вызовется деструктор file,
+// файл будет закрыт
+----
+
+`std::fstream` соответствует идиоме RAII.
 ////
 
 == Управление временем жизни
 
 Предлагается написать “умные” указатели, которые при инициализации получают ресурс (объект выделенный в куче), а при уничтожении - освобождают ресурс.
 
-////
 === Мотивация
 
-// рассказать про то, что самому ловить объекты, созданные через new, неудобно
-////
+Рассмотрим типичный код, создающий что-то на хипе:
+
+[source,cpp]
+----
+lazy_string concat(lazy_string lhs, lazy_string rhs) {
+    char* buffer = new char*[lhs.size() + rhs.size() + 1]{};
+
+    for (size_t i = 0; i < lhs.size(); ++i) {
+        buffer[i] = lhs.at(i);
+    }
+
+    for (size_t i = 0; i < lhs.size(); ++i) {
+        buffer[lhs.size() + i] = rhs.at(i);
+    }
+
+    return lazy_string(buffer);
+}
+----
+
+Есть ли проблемы в этом коде?
+
+ifdef::backend-revealjs[=== !]
+
+Мы допустили ошибку в коде, и за это платим утечкой памяти.
+
+[source,cpp]
+----
+lazy_string concat(lazy_string lhs, lazy_string rhs) {
+    // этот buffer утечет, если кто-то бросит исключение
+    char* buffer = new char*[lhs.size() + rhs.size() + 1]{};
+
+    for (size_t i = 0; i < lhs.size(); ++i) {
+        buffer[i] = lhs.at(i);
+    }
+    // не по тому итерируемся, at бросит исключение
+    for (size_t i = 0; i < lhs.size(); ++i) {
+        buffer[lhs.size() + i] = rhs.at(i);
+    }
+    return lazy_string(buffer);
+}
+----
+
+Как такая ошибка решается?
+
+ifdef::backend-revealjs[=== !]
+
+Можно использовать `shared_buffer`!
+
+[source,cpp]
+----
+lazy_string concat(lazy_string lhs, lazy_string rhs) {
+    // если кто-то кинет исключение,
+    // деструктор buffer очистит память
+    shared_buffer buffer{lhs.size() + rhs.size() + 1};
+
+    for (size_t i = 0; i < lhs.size(); ++i) {
+        buffer.data[i] = lhs.at(i);
+    }
+    for (size_t i = 0; i < rhs.size(); ++i) {
+        buffer.data[lhs.size() + i] = rhs.at(i);
+    }
+    return lazy_string(buffer);
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+Вы уже очень пользуетесь RAII:
+
+* `std::string` для `char const*`
+* `std::vector` и другие контейнеры для `T[]`
+* `std::fstream` для `FILE*` (условно)
+
+Это RAII-обертки для часто используемых ресурсов.
+
+Но когда у вас много своих типов, писать для каждого обертку не хочется.
+
+ifdef::backend-revealjs[=== !]
+
+Хочется иметь инструмент, который можно использовать в сочетании с произвольным указателем
+и уберечь себя от утечек.
+
+Наличие в C++ классов, конструкторов/деструкторов и шаблонов позволяет создать такой инструмент:
+
+*Умные указатели*
 
 == Задача 1. scoped_ptr<T>
 
