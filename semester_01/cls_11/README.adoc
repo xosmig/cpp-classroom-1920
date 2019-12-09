@@ -1,0 +1,50 @@
+= Умные указатели: Практика
+:source-highlighter: highlightjs
+:icons: font
+
+== Задача 2. C API Wrapping
+
+Задача: существует какой-то код на `C` (библиотека или легаси),
+который неудобно использовать из `C++`.
+
+Часто такую проблему можно
+решить, написав небольшой слой кода, "оборачивающий" оригинальный код,
+чтобы с ним было удобнее/безопаснее работать.
+
+
+ifdef::backend-revealjs[=== !]
+
+.C Style API
+[source,cpp]
+```
+struct resource;
+struct sub_resource;
+
+enum resource_mode {
+    SINGLE, ARRAY, UNKNOWN
+};
+
+resource* init_resource(resource_mode mode);
+
+// ресурс должен этой функцией
+void release_resource(resource const*);
+
+sub_resource* get_sub_resource(resource* handle);
+```
+
+=== Подзадачи
+
+* Для предотвращения утечек ресурса, напишите функцию `acquire_resource`,
+возвращающую `shared_ptr<resource>`.
+
+ifdef::backend-revealjs[=== !]
+
+* Для безопасной работы с `sub_resource` напишите функцию `get_sub_resource`,
+возвращающую `shared_ptr<sub_resource>`.
++
+Пока жив `sub_resource`, `resource`, тоже должен жить.
+
+ifdef::backend-revealjs[=== !]
+
+* Иногда `sub_resource` нужен без `resource`. Напишите функцию `acquire_sub_resource`,
+возвращающую `shared_ptr<sub_resource>`.
