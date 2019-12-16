@@ -1,0 +1,194 @@
+= Контрольная работа №3: LINQ.
+:source-highlighter: highlightjs
+:icons: font
+
+templates, linq c++, language integrated query, c#, linq to objects
+
+== Правила сдачи контрольной работы
+
+* решение должно быть закоммичено в ветку с названием `sem_1_control_03`
+* должен быть создан пулл-реквест с названием "Control 3, <фамилия> <имя>"
+** не забудьте добавить своего практика в ревьюеры
+
+ifdef::backend-revealjs[=== !]
+
+* в качестве main-а можно воспользоваться smoke-тестами, которые будут вам предоставлены
+* ваш код должен быть в неймспейсе control_3
+* при решении можно пользоваться классами, которые явно упомянуты в сниппетах в презентации
+* про другие вещи — спрашивать отдельно
+
+== Что такое LINQ?
+
+Language Integrated Query (LINQ) — проект Microsoft по добавлению синтаксиса языка запросов, напоминающего SQL, в языки программирования платформы .NET Framework.
+
+ifdef::backend-revealjs[=== !]
+
+LINQ - это декларативное обращение к коллекции. Т.е. запрос описывает “что” нужно извлечь, а не “как” нужно это сделать.
+
+Декларативные языки избавляют нас от необходимости вникать в детали реализации конкретных алгоритмов и позволяют гибко их изменять.
+
+ifdef::backend-revealjs[=== !]
+
+Вам предлагается реализовать часть функциональности LINQ запросов в языке C++, но для начала рассмотрим примеры.
+
+=== Найдем все числа меньше 5
+
+.Императивный стиль
+[source,cpp]
+----
+vector<int> result_vector;
+for (int i : your_vector)
+    if (i < 5)
+        result_vector.push_back(i);
+return result_vector;
+----
+
+.Декларативный стиль
+[source,cpp]
+----
+auto result_vector =
+    from(your_vector)
+        .where([](int i){return i < 5;})
+        .to_vector();
+----
+
+=== Найдем что-нибудь и преобразуем
+
+.Императивный стиль
+[source,cpp]
+----
+vector<int> result_vector;
+for (int i : your_vector)
+    if (i < 5)
+        result_vector.push_back(i * i);
+return result_vector;
+----
+
+.Декларативный стиль
+[source,cpp]
+----
+auto result_vector =
+    from(your_vector)
+        .where([](int i){return i < 5;})
+        .select([](int i){return i * i;})
+        .to_vector();
+----
+
+=== Колода карт
+
+.Императивный стиль
+[source,cpp]
+----
+vector<Card> result_vector;
+for (const Card& c : your_vector)
+    if (c.Suit == Suits.Spades)
+        result_vector.push_back(c);
+
+std::sort(
+    result_vector.begin(),
+    result_vector.end(),
+    [](const Card& x, const Card& y){return x.Rank < y.Rank;}]
+);
+return result_vector;
+----
+
+ifdef::backend-revealjs[=== !]
+
+.Декларативный стиль
+[source,cpp]
+----
+auto result_vector =
+    from(your_vector)
+        .where([](const Card& c){return c.Suit == Suits.Spades;})
+        .orderBy([](const Card& c){return c.Rank;})
+        .to_vector();
+----
+
+== Задача 1 (0.5 балла).
+
+Для того, чтобы расширить обычные коллекции своими методами - вам нужно написать обертку над `vector<T>`.
+Назовем её `enumerable<T>`.
+
+Эту обертку будет создавать свободная функция `from(...)`, которую тоже необходимо реализовать.
+
+ifdef::backend-revealjs[=== !]
+
+Обертка должна обладать следующими методами:
+
+* `to_vector` -- возвращает вектор, содержащий данные данного `enumerable`.
+* `count()` -- количество елементов в `enumerable`.
+* `any()` -- есть ли в `enumerable` хотя бы один элемент?
+
+== Задача 2 (1 балл).
+
+В enumerable должно появиться 3 новых метода:
+
+* `size_t count(Predicate f)` - возвращает количество элементов, для которых предикат возвращает true.
+* `bool any(Functor f)` - возвращает true, если хотя бы один из элементов удовлетворяет предикату.
+
+ifdef::backend-revealjs[=== !]
+
+* `enumerable<T> where(Functor f)` - возвращает enumerable, в котором остались только те элементы из предыдущего, для которых Predicate вернул true.
+
+== Задача 3 (1 балл)
+
+Добавим метод для трансформации элементов коллекции `select`.
+
+Этот метод принимает функцию и возвращает `enumerable`, содержащий элементы оригинала, преобразованные с помощью этой функции.
+
+[source,cpp]
+----
+vector<int> ints_vector = {1, 2, 3};
+vector<double> result =
+    from(ints_vector)
+        .select<double>([](int i) {return sqrt((double)i);})
+        .to_vector();
+----
+
+== Задача на +0.5 балла
+
+Попробуйте реализовать `select` так, чтобы при ее вызове не нужно было передавать тип элементов возвращаемой коллекции.
+
+== Задача 4* (1 балл).
+
+Мы реализовали наивную версии библиотеки запросов LINQ.
+
+При вызове каждой функции в цепочке копируется вся коллекция элементов и затем происходят вычисления.
+
+Так как мы крутые, хардкорные C++ программисты - нас это не устраивает.
+
+Научим наш LINQ работать, не копируя элементы без необходимости.
+
+ifdef::backend-revealjs[=== !]
+
+Рассмотрим пример:
+
+[source,cpp]
+----
+auto result =
+    from(huge_vector)
+        .where([] (int x) {return x < 10;});
+----
+
+Сейчас в `result` скопировался весь вектор с x < 10. Но зачем?
+
+Например мы хотим проверить - есть ли такие элементы:
+
+[source,cpp]
+----
+auto hasAny = result.any();
+----
+
+Для этого нам нужно отфильтровать только один элемент и сразу вернуть `true`.
+
+ifdef::backend-revealjs[=== !]
+
+Сделайте так, чтобы каждый `enumerable` в цепочке являлся источником данных, доступных по требованию для следующего `enumerable` в цепочке.
+
+ifdef::backend-revealjs[=== !]
+
+Хорошим интерфейсом для таких источников данных является интерфейс "итератора".
+
+Предыдущий enumerable передает на вход следующему enumerable итератор.
+
+Итератор возвращает элементы в соответствии с логикой создавшего его enumerable.
