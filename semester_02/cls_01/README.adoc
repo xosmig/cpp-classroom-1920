@@ -1,0 +1,132 @@
+= Обработка ошибок, исключения
+:source-highlighter: highlightjs
+:revealjs_hash: true
+:icons: font
+
+C++ часть 2, cеминар #1
+
+ИТМО, 10.02.2019
+
+== Типичные ошибки обработки ошибок
+
+И как их исправлять
+
+=== Error code out parameter
+
+Есть ли проблемы?
+
+[source,cpp]
+----
+T* fetch_data(connection* c, int& err_code) {
+    auto result = c->fetch();
+    if (result.status == NETWORK_FAILURE) {
+        err_code = 1;
+    } else if (result.status == RESPONSE_ERROR) {
+        err_code = 2;
+    } else if ...
+
+    return result.data;
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+Что может пойти не так?
+
+[source,cpp]
+----
+int err_code;
+auto data = fetch_data(c, err_code);
+if (!err_code) {
+    work(data);
+    clear(data)
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+[.step]
+- Из-за неинициализированного `err_code` код становится непредсказуемым.
+- Чтобы защитить пользователя, нужно всегда приводить out-параметр в консистентное состояние.
+- В данном случае это значение `0`.
+
+=== Поимка исключений
+
+Что не так с этим кодом?
+
+[source,cpp]
+----
+struct specific_exception : std::exception { ... };
+
+try {
+    ...
+} catch (std::exception e) {
+    ...
+} catch (specific_exception e) {
+    ...
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+[.step]
+- Поимка исключения по значению приводит к срезке. Срезка ведет к потере информации об ошибке.
+- Порядок catch-блоков важен - в нашем случае `specific_exception` никогда не будет пойман.
+- Ловить исключения нужно по константной ссылке (чтобы случайно не поменять).
+
+=== Diamond Error
+
+[source,cpp]
+----
+struct io_exception : std::exception {...};
+struct invalid_input_exception : std::exception {...};
+struct invalid_file_content_exception 
+    : io_exception, invalid_input_exception {...};
+----
+
+ifdef::backend-revealjs[=== !]
+
+Попробуем его поймать: 
+
+[source,cpp]
+----
+try {
+    throw invalid_file_content_exception();
+} catch (std::exception const& e) {
+    std::cout << e.what() << std::endl;
+}
+----
+
+Что произойдет?
+
+[.step]
+- Ничего, потому что не понятно, по какой из баз ловить.
+- Как починить? Виртуальным наследованием.
+
+////
+
+- есть смысл рассказать про современные классы для презентации ошибок
+    - параллель с указателями
+    - optional, either, variant
+- задание на отладку
+    - нужен кусок сломанного кода, сложного к отладке
+- задание на ошибки
+    - написать код в двух вариантах -- с исключениями и без
+    - задание на работу сразу с несколькими вариантами апи (3 библиотеки, во всех разные апи, нужны все 3)
+        - 
+- показать типичные ошибки работы с ошибками
+    - ловля иключения по значению
+    - неочистка out параметра
+- идеологические моменты
+    - что делать при разработке библиотек?
+        - в качестве примера: std::fstream
+        - https://en.cppreference.com/w/cpp/io/basic_ios/exceptions
+
+--- 
+
+1. Стратегии обработки ошибок (раньше это была лекция 1_12)
+2. Исключения и гарантии безопасности, noexcept (это была 2_5)
+
+В первой части я раньше на лекциях показывал всякий crash reporting, так что если включить это в семинар - было бы интересно
+
+////
