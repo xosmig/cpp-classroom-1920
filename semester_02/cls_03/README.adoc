@@ -9,6 +9,140 @@ C++ часть 2, cеминар #3
 
 ИТМО, 24.02.2020
 
+== План занятия
+
+- Полезные функции для работы с контейнерами
+- Инвалидация итераторов
+- Характеристики итераторов
+- Связь итераторов и range-based for loop
+
+////
+- Использование популярных контейнеров
+- Использование итераторов
+- Пользовательские итераторы
+////
+
+
+== Работа с итераторами
+
+* begin/cbegin/rbegin, end/cend/rend — работают с коллекциями и массивами
+** код получается более обобщенным
+
+ifdef::backend-revealjs[=== !]
+
+[.step]
+* next(Iterator it, diff_t step = 0) — возвращает копию итератора, сдвинутую на step шагов
+* forward(Iterator& it, diff_t step) — двигает итератор it на step шагов
+* make_reverse_iterator — создает итератор, двигающийся в противоположном направлении (если это возможно)
+* NB: Эти функции не range-safe!
+
+=== Пример 1
+
+[source,cpp]
+----
+int collection[]{1, 2, 3};
+// array<int, 3> collection{1, 2, 3};
+// vector<int> collection{1, 2, 3};
+// set<int> collection{1, 2, 3};
+
+using std::begin;
+using std::end;
+
+// begin/end работают со всем вышеперечисленным
+vector<int> copy(begin(collection), end(collection));
+----
+
+=== Пример 2
+
+[source,cpp]
+----
+class NotMyCollection;
+auto begin(NotMyCollection&) ...;
+auto end(NotMyCollection&) ...;
+
+struct MyCollection {
+    auto begin() ...;
+    auto end() ...;
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+[source,cpp]
+----
+MyCollection collection;
+// NotMyCollection collection;
+
+using std::begin;
+using std::end;
+
+// begin/end работают с пользовательскими типами
+vector<int> copy(begin(collection), end(collection));
+----
+
+== Характеристики итераторов
+
+Свойства итераторов выражаются с помощью следующих typedef-ов, определенных в классах-итераторах:
+
+ifdef::backend-revealjs[=== !]
+
+- `difference_type`
+- `value_type`
+- `pointer`
+- `reference`
+- `iterator_category`
+
+Если какой-то из этих параметров не имеет смысла (например, `value_type` у `output_iterator`), то вместо него нужно поставить void.
+
+== Инвалидация итераторов
+
+Модификация контейнера может привести к инвалидации итераторов, указывающих на его элементы.
+
+=== Пример
+
+[source,cpp]
+----
+vector<string> v {"hello"};
+auto it = v.begin();
+v.push_back("world");
+cout << *it << endl;
+----
+
+В чем проблема?
+
+[.step]
+- Вектор расширился, и кусочек памяти, указатель на который хранился в `it`, уже освобожден.
+- Инвалидироваться могут как все, так и часть итераторов.
+
+== Связь итераторов и range-based for loop
+
+"Умный" for loop, появившийся в C++11, является синтаксическим сахаром и работает через итераторы.
+
+[source,cpp]
+----
+multimap<int, string> map = {{1, "Lol"}, {1, "Kek"}};
+
+for (auto& i : map) {
+    cout << i.second << endl;
+}
+// <=>
+for (auto it = map.begin(); it != map.end(); ++it) {
+    auto& i = *it;
+    cout << i.second << endl;
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+*Следствие*: по любому объекту, похожему на контейнер, можно проитерироваться.
+
+ifdef::backend-revealjs[=== !]
+
+Чтобы по объекту класса `T` можно было итерироваться, нужно одно из двух:
+
+- наличие у него методов begin/end, которые можно вызвать (с учетом константности)
+- наличие свободных функций begin/end, которые можно вызвать на этом объекте (с учетом константности)
+
 == Задача 1 (0.5 балла)
 
 Напишите класс `range`, позволяющий работать с итераторами через `range-based for loop`.
