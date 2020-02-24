@@ -3,10 +3,82 @@
 :revealjs_hash: true
 :icons: font
 
+Стандартная библиотека. Итераторы
+
 C++ часть 2, cеминар #3
 
 ИТМО, 24.02.2020
 
 == Задача 1 (0.5 балла)
 
+Напишите класс `range`, позволяющий работать с итераторами через `range-based for loop`.
+
+Публичный конструктор range должен принимать два итератора (начало и конец последовательности).
+
+ifdef::backend-revealjs[=== !]
+
+У `range` должен быть метод `reversed`, создающий новый `range`, но идущий в обратном порядке (если это возможно).
+
+Также должно существовать два фабричных метода, чтобы конструировать `range`:
+
+[source,cpp]
+----
+auto make_range(Iterator_t from, Iterator_t to)
+auto make_range(std::pair<Iterator_t, Iterator_t> pair)
+----
+
+=== Пример использования
+
+[source,cpp]
+----
+vector<int> v = {1, 2, 3, 4};
+
+for (auto& i: make_range(cbegin(v), cend(v)).reversed()) {
+    cout << i << endl;
+}
+
+multimap<int, string> map = {
+    {1, "Hello"}, {1, "Hi"},
+    {2, "Bye"}, {2, "Goodbye"}
+};
+
+for (auto& i: make_range(map.equal_range(2))) {
+    cout << i.second << endl;
+}
+----
+
 == Задача 2 (1 балл)
+
+Напишите класс, позволяющий бронировать комнаты для митингов.
+
+ifdef::backend-revealjs[=== !]
+
+Есть класс `Event`, представляющий собой событие. Он состоит из:
+
+- имени события
+- номера комнаты, в которой оно происходит
+- времени старта (целое число)
+- длительности
+
+ifdef::backend-revealjs[=== !]
+
+Необходимо написать класс `DaySchedule`, позволяющий организовывать события так, чтобы они не пересекались между собой.
+
+=== Пример использования
+
+[source, cpp]
+----
+DaySchedule schedule({42, 12, 24});
+
+Event ev("discuss", 42, 43200, 3600);
+schedule.try_add_event(ev);
+
+Event ev2("discuss2", 24, 41400, 7200);
+schedule.try_add_event(ev2);
+
+Event ev3("discuss3", 24, 32400, 3600);
+schedule.try_add_event(ev3);
+
+auto [begin, end] = schedule.get_events_at_moment(45000);
+std::vector<Events> plannedEvents(begin, end);
+----
