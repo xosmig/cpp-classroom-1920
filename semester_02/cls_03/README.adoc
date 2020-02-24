@@ -9,6 +9,94 @@ C++ часть 2, cеминар #3
 
 ИТМО, 24.02.2020
 
+== Замечания насчет семинара #2
+
+На основе часто встречающихся ошибок и забытых советов.
+
+=== Отсутствие переиспользования
+
+[source,cpp]
+----
+unqiue_ptr& operator=(unique_ptr&& other) {
+    if (this != &other) {
+        delete ptr_;
+        ptr_ = other.ptr_;
+        other.ptr_ = nullptr;
+    }
+    return *this;
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+[source,cpp]
+----
+unqiue_ptr& operator=(unique_ptr&& other) {
+    if (this != &other) {
+        reset();
+        ptr_ = other.release();
+    }
+    return *this;
+}
+----
+
+ifdef::backend-revealjs[=== !]
+
+Можно еще лучше!
+
+[source,cpp]
+----
+unqiue_ptr& operator=(unique_ptr&& other) {
+    reset(other.release());
+    return *this;
+}
+----
+
+=== Ссылки против значений
+
+Рассмотрим простой класс:
+
+[source,cpp]
+----
+class User {
+    User(string const& name): name(name) {}
+    User(string&& name): name(std::move(name)) {}
+};
+----
+
+ifdef::backend-revealjs[=== !]
+Теперь `user`-у нужен `surname`!
+
+[source,cpp]
+----
+class User {
+    User(string const& name, string const& surname): ...
+    User(string&& name,  string&& surname): ...
+
+    User(string const& name, string&& surname): ...
+    User(string&& name,  string const& surname): ...
+};
+----
+
+[.step]
+* Что будет, если будет 10 полей? Комбинаторный взрыв!
+* Что же делать?
+
+ifdef::backend-revealjs[=== !]
+Передавать по значению!
+
+[source,cpp]
+----
+class User {
+    User(string name, string surname):
+        name(move(name)), surname(move(surname) {}
+};
+----
+
+[.step]
+* Одна функция.
+* Покрывает все кейсы сразу.
+
 == План занятия
 
 - Полезные функции для работы с контейнерами
@@ -22,7 +110,6 @@ C++ часть 2, cеминар #3
 - Пользовательские итераторы
 ////
 
-
 == Работа с итераторами
 
 * begin/cbegin/rbegin, end/cend/rend — работают с коллекциями и массивами
@@ -32,7 +119,7 @@ ifdef::backend-revealjs[=== !]
 
 [.step]
 * next(Iterator it, diff_t step = 0) — возвращает копию итератора, сдвинутую на step шагов
-* forward(Iterator& it, diff_t step) — двигает итератор it на step шагов
+* advance(Iterator& it, diff_t step) — двигает итератор it на step шагов
 * make_reverse_iterator — создает итератор, двигающийся в противоположном направлении (если это возможно)
 * NB: Эти функции не range-safe!
 
