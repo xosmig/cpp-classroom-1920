@@ -2,6 +2,7 @@
 
 #include <string>
 #include <cassert>
+#include <iostream>
 
 //#define TASK_2
 //#define TASK_3
