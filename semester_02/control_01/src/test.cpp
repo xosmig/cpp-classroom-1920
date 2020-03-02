@@ -4,7 +4,7 @@
 #include <cassert>
 #include <iostream>
 
-//#define TASK_2
+#define TASK_2
 //#define TASK_3
 
 static void smoke_test_vector() {
