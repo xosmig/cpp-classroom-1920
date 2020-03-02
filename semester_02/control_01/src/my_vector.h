@@ -192,6 +192,39 @@ class vector
     return size_ == 0;
   }
 
+  void erase(size_t idx) noexcept
+  {
+    assert(idx >= 0 && idx < size_);
+    if (idx == size_ - 1) {
+      pop_back();
+      return;
+    }
+    if constexpr (noexcept(std::declval<T>() = std::move(std::declval<T>()))) {
+      data_.get()[idx].~T();
+      for (size_t i = idx; i < size_ - 1; i++) {
+        data_.get()[i] = std::move(data_.get()[i + 1]);
+      }
+    } else {
+      std::unique_ptr<T> new_data(Allocator().allocate(cap_));
+      size_t cur;
+      try {
+        for (cur = 0; cur < idx; cur++) {
+          new (new_data.get() + cur) T(data_.get()[cur]);
+        }
+        for (cur = idx; cur < size_ - 1; cur++) {
+          new (new_data.get() + cur) T(data_.get()[cur + 1]);
+        }
+      } catch (...) {
+        while (cur > 0) {
+          cur--;
+          new_data.get()[cur].~T();
+        }
+        throw;
+      }
+    }
+    size_--;
+  }
+
   void clear() noexcept
   {
     while (!empty()) {
