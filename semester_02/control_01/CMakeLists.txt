@@ -12,4 +12,4 @@ endif()
 
 include_directories(src)
 
-#add_executable(control-1-test src/test.cpp)
+add_executable(control-1-test src/test.cpp)
